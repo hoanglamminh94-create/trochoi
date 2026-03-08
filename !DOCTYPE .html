@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>8A Gift for Mrs. Nga</title>
+    <style>
+        body { margin: 0; overflow: hidden; background: #ffe6f2; font-family: Arial; touch-action: none; }
+        canvas { display: block; }
+        #msg { position: absolute; top: 20px; width: 100%; text-align: center; color: #ff3385; font-size: 20px; font-weight: bold; pointer-events: none; }
+    </style>
+</head>
+<body>
+    <div id="msg">Mrs. Nga, catch the 8/3 wishes! <br> Score: <span id="score">0</span></div>
+    <canvas id="gameCanvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreEl = document.getElementById('score');
+        
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let score = 0;
+        const flowers = [];
+        const catcher = { x: canvas.width / 2 - 40, y: canvas.height - 80, w: 80, h: 40 };
+        const wishes = ["Love", "Joy", "Health", "8/3", "Beauty", "Success"];
+
+        // Điều khiển trên iPhone (Touch)
+        canvas.addEventListener('touchmove', (e) => {
+            const touch = e.touches[0];
+            catcher.x = touch.clientX - catcher.w / 2;
+        });
+
+        function createFlower() {
+            flowers.push({
+                x: Math.random() * (canvas.width - 30),
+                y: -30,
+                s: 2 + Math.random() * 3,
+                text: wishes[Math.floor(Math.random() * wishes.length)]
+            });
+        }
+
+        function update() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Vẽ người hứng (Giỏ quà 8A)
+            ctx.fillStyle = "#ff3385";
+            ctx.fillRect(catcher.x, catcher.y, catcher.w, catcher.h);
+            ctx.fillStyle = "white";
+            ctx.fillText("Lớp 8A", catcher.x + 20, catcher.y + 25);
+
+            for (let i = flowers.length - 1; i >= 0; i--) {
+                let f = flowers[i];
+                f.y += f.s;
+                
+                // Vẽ bông hoa/lời chúc
+                ctx.font = "20px Arial";
+                ctx.fillText("🌸 " + f.text, f.x, f.y);
+
+                // Kiểm tra va chạm
+                if (f.y > catcher.y && f.x > catcher.x && f.x < catcher.x + catcher.w) {
+                    score++;
+                    scoreEl.innerText = score;
+                    flowers.splice(i, 1);
+                    if (score === 10) alert("Happy Women's Day to Mrs. Nga! You're the best!");
+                } else if (f.y > canvas.height) {
+                    flowers.splice(i, 1);
+                }
+            }
+            requestAnimationFrame(update);
+        }
+
+        setInterval(createFlower, 1000);
+        update();
+    </script>
+</body>
+</html>
