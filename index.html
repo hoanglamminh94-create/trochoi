@@ -1,27 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>8A Gift for Mrs. Nga</title>
-    <style>
-        body { margin: 0; overflow: hidden; background: #fff0f5; font-family: 'Segoe UI', Arial; touch-action: none; }
-        canvas { display: block; background: linear-gradient(#ffe6f2, #fff); }
-        #ui { position: absolute; top: 15px; width: 100%; text-align: center; color: #d81b60; font-size: 18px; font-weight: bold; pointer-events: none; }
-        #win-screen { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.2); text-align: center; width: 80%; }
-    </style>
-</head>
-<body>
-    <div id="ui">🎁 Gifts Collected: <span id="score">0</span> / 20</div>
-    <div id="win-screen" id="winScreen">
-        <h2 style="color: #ff3385;">🎉 MISSION COMPLETE! 🎉</h2>
-        <p style="font-size: 18px;">Happy Women's Day to Mrs. Nga!</p>
-        <p>Lớp 8A chúc cô luôn rạng rỡ như những đóa hoa!</p>
-        <button onclick="location.reload()" style="background: #ff3385; color: white; border: none; padding: 10px 20px; border-radius: 5px;">Chơi lại</button>
-    </div>
-    <canvas id="gameCanvas"></canvas>
-
-    <script>
-        const canvas = document.getElementById('gameCanvas');
+const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const scoreEl = document.getElementById('score');
         const winScreen = document.getElementById('win-screen');
@@ -32,16 +9,13 @@
         let score = 0;
         let gameOver = false;
         const items = [];
-        // Giỏ hứng thiết kế lại
         const basket = { x: canvas.width / 2 - 50, y: canvas.height - 100, w: 100, h: 60 };
         const wishes = ["🌹", "🌸", "💐", "💖", "✨"];
 
-        // Điều khiển (Chuột & Cảm ứng iPhone)
         function moveHandler(e) {
             if (gameOver) return;
             let clientX = e.touches ? e.touches[0].clientX : e.clientX;
             basket.x = clientX - basket.w / 2;
-            // Giữ giỏ trong màn hình
             if (basket.x < 0) basket.x = 0;
             if (basket.x > canvas.width - basket.w) basket.x = canvas.width - basket.w;
         }
@@ -60,8 +34,7 @@
         }
 
         function drawBasket() {
-            // Vẽ giỏ hứng hình thang
-            ctx.fillStyle = "#8b4513"; // Màu gỗ
+            ctx.fillStyle = "#8b4513";
             ctx.beginPath();
             ctx.moveTo(basket.x, basket.y);
             ctx.lineTo(basket.x + basket.w, basket.y);
@@ -69,8 +42,7 @@
             ctx.lineTo(basket.x + 15, basket.y + basket.h);
             ctx.closePath();
             ctx.fill();
-            // Nơ trang trí
-            ctx.fillStyle = "#ff3385";
+            ctx.fillStyle = "white";
             ctx.font = "14px Arial";
             ctx.fillText("CLASS 8A", basket.x + 18, basket.y + 35);
         }
@@ -78,26 +50,29 @@
         function update() {
             if (gameOver) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
             drawBasket();
 
             for (let i = items.length - 1; i >= 0; i--) {
                 let it = items[i];
                 it.y += it.s;
-                
-                // Vẽ hộp quà hoặc hoa
                 ctx.font = "35px Arial";
                 ctx.fillText(it.type === 'GIFT' ? "🎁" : it.icon, it.x, it.y);
 
-                // Check va chạm (Điều kiện thắng)
                 if (it.y > basket.y && it.y < basket.y + basket.h && it.x > basket.x - 20 && it.x < basket.x + basket.w) {
                     score++;
                     scoreEl.innerText = score;
                     items.splice(i, 1);
                     
-                    // Cài đặt điều kiện thắng: 20 điểm
-                    if (score >= 20) {
-                        gameOver = true;
+                    // Cài đặt các mốc thoại theo yêu cầu của Hoàng Minh
+                    if (score === 10) {
+                        alert("Cô còn đang non nhoá!");
+                    } else if (score === 20) {
+                        alert("Nếu mà chơi đến đây thì cô chứ cs thưởng mô");
+                    } else if (score === 50) {
+                        alert("Phần quà của cô là iPhone 17 Pro Max nhá nhưng chơi đến 100 điểm sẽ cs bất ngờ");
+                    } else if (score === 100) {
+                        alert("Ôi thôi check, e đã đc 1 căn villa ràu thôi đừng chơi nữa");
+                        gameOver = true; // Dừng trò chơi lại
                         winScreen.style.display = 'block';
                     }
                 } else if (it.y > canvas.height) {
@@ -109,6 +84,3 @@
 
         setInterval(createItem, 800);
         update();
-    </script>
-</body>
-</html>
