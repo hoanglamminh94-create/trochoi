@@ -4,74 +4,110 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>8A Gift for Mrs. Nga</title>
     <style>
-        body { margin: 0; overflow: hidden; background: #ffe6f2; font-family: Arial; touch-action: none; }
-        canvas { display: block; }
-        #msg { position: absolute; top: 20px; width: 100%; text-align: center; color: #ff3385; font-size: 20px; font-weight: bold; pointer-events: none; }
+        body { margin: 0; overflow: hidden; background: #fff0f5; font-family: 'Segoe UI', Arial; touch-action: none; }
+        canvas { display: block; background: linear-gradient(#ffe6f2, #fff); }
+        #ui { position: absolute; top: 15px; width: 100%; text-align: center; color: #d81b60; font-size: 18px; font-weight: bold; pointer-events: none; }
+        #win-screen { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 15px; box-shadow: 0 0 20px rgba(0,0,0,0.2); text-align: center; width: 80%; }
     </style>
 </head>
 <body>
-    <div id="msg">Mrs. Nga, catch the 8/3 wishes! <br> Score: <span id="score">0</span></div>
+    <div id="ui">🎁 Gifts Collected: <span id="score">0</span> / 20</div>
+    <div id="win-screen" id="winScreen">
+        <h2 style="color: #ff3385;">🎉 MISSION COMPLETE! 🎉</h2>
+        <p style="font-size: 18px;">Happy Women's Day to Mrs. Nga!</p>
+        <p>Lớp 8A chúc cô luôn rạng rỡ như những đóa hoa!</p>
+        <button onclick="location.reload()" style="background: #ff3385; color: white; border: none; padding: 10px 20px; border-radius: 5px;">Chơi lại</button>
+    </div>
     <canvas id="gameCanvas"></canvas>
 
     <script>
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const scoreEl = document.getElementById('score');
+        const winScreen = document.getElementById('win-screen');
         
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
 
         let score = 0;
-        const flowers = [];
-        const catcher = { x: canvas.width / 2 - 40, y: canvas.height - 80, w: 80, h: 40 };
-        const wishes = ["Love", "Joy", "Health", "8/3", "Beauty", "Success"];
+        let gameOver = false;
+        const items = [];
+        // Giỏ hứng thiết kế lại
+        const basket = { x: canvas.width / 2 - 50, y: canvas.height - 100, w: 100, h: 60 };
+        const wishes = ["🌹", "🌸", "💐", "💖", "✨"];
 
-        // Điều khiển trên iPhone (Touch)
-        canvas.addEventListener('touchmove', (e) => {
-            const touch = e.touches[0];
-            catcher.x = touch.clientX - catcher.w / 2;
-        });
+        // Điều khiển (Chuột & Cảm ứng iPhone)
+        function moveHandler(e) {
+            if (gameOver) return;
+            let clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            basket.x = clientX - basket.w / 2;
+            // Giữ giỏ trong màn hình
+            if (basket.x < 0) basket.x = 0;
+            if (basket.x > canvas.width - basket.w) basket.x = canvas.width - basket.w;
+        }
+        canvas.addEventListener('touchmove', moveHandler);
+        canvas.addEventListener('mousemove', moveHandler);
 
-        function createFlower() {
-            flowers.push({
-                x: Math.random() * (canvas.width - 30),
-                y: -30,
-                s: 2 + Math.random() * 3,
-                text: wishes[Math.floor(Math.random() * wishes.length)]
+        function createItem() {
+            if (gameOver) return;
+            items.push({
+                x: Math.random() * (canvas.width - 40),
+                y: -50,
+                s: 3 + Math.random() * 4,
+                type: Math.random() > 0.3 ? 'GIFT' : 'FLOWER',
+                icon: wishes[Math.floor(Math.random() * wishes.length)]
             });
         }
 
+        function drawBasket() {
+            // Vẽ giỏ hứng hình thang
+            ctx.fillStyle = "#8b4513"; // Màu gỗ
+            ctx.beginPath();
+            ctx.moveTo(basket.x, basket.y);
+            ctx.lineTo(basket.x + basket.w, basket.y);
+            ctx.lineTo(basket.x + basket.w - 15, basket.y + basket.h);
+            ctx.lineTo(basket.x + 15, basket.y + basket.h);
+            ctx.closePath();
+            ctx.fill();
+            // Nơ trang trí
+            ctx.fillStyle = "#ff3385";
+            ctx.font = "14px Arial";
+            ctx.fillText("CLASS 8A", basket.x + 18, basket.y + 35);
+        }
+
         function update() {
+            if (gameOver) return;
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             
-            // Vẽ người hứng (Giỏ quà 8A)
-            ctx.fillStyle = "#ff3385";
-            ctx.fillRect(catcher.x, catcher.y, catcher.w, catcher.h);
-            ctx.fillStyle = "white";
-            ctx.fillText("Lớp 8A", catcher.x + 20, catcher.y + 25);
+            drawBasket();
 
-            for (let i = flowers.length - 1; i >= 0; i--) {
-                let f = flowers[i];
-                f.y += f.s;
+            for (let i = items.length - 1; i >= 0; i--) {
+                let it = items[i];
+                it.y += it.s;
                 
-                // Vẽ bông hoa/lời chúc
-                ctx.font = "20px Arial";
-                ctx.fillText("🌸 " + f.text, f.x, f.y);
+                // Vẽ hộp quà hoặc hoa
+                ctx.font = "35px Arial";
+                ctx.fillText(it.type === 'GIFT' ? "🎁" : it.icon, it.x, it.y);
 
-                // Kiểm tra va chạm
-                if (f.y > catcher.y && f.x > catcher.x && f.x < catcher.x + catcher.w) {
+                // Check va chạm (Điều kiện thắng)
+                if (it.y > basket.y && it.y < basket.y + basket.h && it.x > basket.x - 20 && it.x < basket.x + basket.w) {
                     score++;
                     scoreEl.innerText = score;
-                    flowers.splice(i, 1);
-                    if (score === 10) alert("Happy Women's Day to Mrs. Nga! You're the best!");
-                } else if (f.y > canvas.height) {
-                    flowers.splice(i, 1);
+                    items.splice(i, 1);
+                    
+                    // Cài đặt điều kiện thắng: 20 điểm
+                    if (score >= 20) {
+                        gameOver = true;
+                        winScreen.style.display = 'block';
+                    }
+                } else if (it.y > canvas.height) {
+                    items.splice(i, 1);
                 }
             }
             requestAnimationFrame(update);
         }
 
-        setInterval(createFlower, 1000);
+        setInterval(createItem, 800);
         update();
     </script>
 </body>
